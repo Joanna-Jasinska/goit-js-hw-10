@@ -1,8 +1,8 @@
 import './css/styles.css';
 import { _ } from 'lodash';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
-import Notiflix from 'notiflix';
+// import Notiflix from 'notiflix';
 
 const DEBOUNCE_DELAY = 3000;
 const input = document.querySelector('#search-box');
