@@ -1,37 +1,34 @@
 import './css/styles.css';
 import { _ } from 'lodash';
-// import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
-// import Notiflix from 'notiflix';
 
-const DEBOUNCE_DELAY = 3000;
+const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
 const list = document.querySelector('.country-list');
 const info = document.querySelector('.country-info');
 
 input.addEventListener(
   'input',
-  _.debounce(e => {
-    let txt = input.value.trim();
-    if (txt) {
-      fetchCountries(txt);
-    } else {
-      list.innerHTML = '';
-      info.innerHTML = '';
-    }
-  }),
-  DEBOUNCE_DELAY,
-  {
-    leading: false,
-    trailing: true,
-  }
+  _.debounce(
+    e => {
+      let txt = input.value.trim();
+      if (txt) {
+        fetchCountries(txt);
+      } else {
+        list.innerHTML = '';
+        info.innerHTML = '';
+      }
+    },
+    DEBOUNCE_DELAY,
+    [
+      (options = {
+        leading: false,
+        trailing: true,
+      }),
+    ]
+  )
 );
 
-// name.official - pełna nazwa kraju
-// capital - stolica
-// population - liczba ludności
-// flags.svg - link do ilustracji przedstawiającej flagę
-// languages - tablica języków
 export const renderCountryInfo = country => {
   list.innerHTML = '';
   let lang = Array.isArray(Object.values(country.languages))
@@ -57,7 +54,6 @@ export const renderCountryList = countryList => {
         </li>`;
     })
     .join('');
-  // list.innerHTML = '<li>markup?</li>';
   list.innerHTML = markup;
   const countryDivs = document.querySelectorAll('.country-list .name');
   for (const div of countryDivs) {
