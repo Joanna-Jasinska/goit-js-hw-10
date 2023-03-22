@@ -3,7 +3,7 @@ import { _ } from 'lodash';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
 
-console.log('updated 11:07 22.03.2023');
+// console.log('updated 14:09 22.03.2023');
 
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
@@ -46,8 +46,6 @@ const logError = ({ error }) => {
 };
 
 const displayData = ({ data }) => {
-  console.log('checking acquired data');
-  console.log(data);
   if (data.empty) {
     clearTimeout(loadingTimer);
     if (lastNotification != 'notFound') {
@@ -99,7 +97,6 @@ const refreshDataRequest = () => {
     e => {
       let txt = input.value.trim();
       if (txt) {
-        console.log('will fetch: ' + txt);
         clearTimeout(loadingTimer);
         if (lastNotification != 'loading') {
           loadingTimer = setTimeout(() => {
@@ -108,7 +105,7 @@ const refreshDataRequest = () => {
               timeout: 999000,
               showOnlyTheLastOne: true,
             });
-          }, 1000);
+          }, 1500);
         }
         fetchCountries(txt, displayData, logError);
       } else {
@@ -159,7 +156,6 @@ const renderCountryList = countryList => {
       input.value = div.innerHTML;
       let txt = input.value.trim();
       if (txt) {
-        console.log('will fetch: ' + txt);
         clearTimeout(loadingTimer);
         if (lastNotification != 'loading') {
           loadingTimer = setTimeout(() => {
@@ -168,7 +164,7 @@ const renderCountryList = countryList => {
               timeout: 999000,
               showOnlyTheLastOne: true,
             });
-          }, 1000);
+          }, 1500);
         }
         fetchCountries(txt, displayData, logError);
       }
