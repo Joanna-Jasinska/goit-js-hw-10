@@ -3,6 +3,8 @@ import { _ } from 'lodash';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
 
+console.log('updated 10:40 22.03.2023');
+
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
 const list = document.querySelector('.country-list');
@@ -175,4 +177,3 @@ const renderCountryList = countryList => {
 };
 
 input.addEventListener('input', refreshDataRequest());
-console.log('updated 10:40 22.03.2023');
