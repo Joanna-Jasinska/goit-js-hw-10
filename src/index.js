@@ -1,19 +1,114 @@
 import './css/styles.css';
 import { _ } from 'lodash';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
 
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
 const list = document.querySelector('.country-list');
 const info = document.querySelector('.country-info');
+let lastNotification = 'noNotification';
+let loadingTimer = 0;
 
-input.addEventListener(
-  'input',
-  _.debounce(
+export const fetchData = (url, resolve, reject) => {
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        if (response.status == 404) {
+          return { empty: 1 };
+        } else {
+          // reject({ error: response.status });
+          throw new Error(response.status);
+        }
+      }
+      return response.json();
+    })
+    .then(data => {
+      resolve({ data: data });
+    })
+    .catch(error => {
+      reject({ error: error });
+      // throw new Error(error);
+    });
+};
+
+const logError = ({ error }) => {
+  clearTimeout(loadingTimer);
+  lastNotification = 'serverError';
+  console.log(error);
+  Notify.failure('We are sorry. \nRequest has been denied by the server.', {
+    timeout: 3000,
+    showOnlyTheLastOne: true,
+  });
+  // throw new Error(error);
+};
+
+const displayData = ({ data }) => {
+  console.log('checking acquired data');
+  console.log(data);
+  if (data.empty) {
+    clearTimeout(loadingTimer);
+    if (lastNotification != 'notFound') {
+      lastNotification = 'notFound';
+      list.innerHTML = '';
+      info.innerHTML = '';
+      Notify.failure('Oops, there is no country with that name', {
+        timeout: 3000,
+        showOnlyTheLastOne: true,
+      });
+    }
+    return;
+  }
+
+  // Data handling
+  if (data.length > 10) {
+    clearTimeout(loadingTimer);
+    if (lastNotification == 'tooMany') return;
+    lastNotification = 'tooMany';
+    list.innerHTML = '';
+    info.innerHTML = '';
+    Notify.info('Too many matches found. Please enter a more specific name.', {
+      timeout: 3000,
+      showOnlyTheLastOne: true,
+    });
+    return;
+  }
+  if (data.length == 1) {
+    lastNotification = 'loaded';
+    clearTimeout(loadingTimer);
+    Notify.info('Loaded country information.', {
+      timeout: 3000,
+      showOnlyTheLastOne: true,
+    });
+    renderCountryInfo(data[0]);
+    return;
+  }
+  lastNotification = 'loaded';
+  clearTimeout(loadingTimer);
+  Notify.info('Loaded list of countries', {
+    timeout: 3000,
+    showOnlyTheLastOne: true,
+  });
+  renderCountryList([...data]);
+};
+
+const refreshDataRequest = () => {
+  return _.debounce(
     e => {
       let txt = input.value.trim();
       if (txt) {
-        fetchCountries(txt);
+        console.log('will fetch: ' + txt);
+        clearTimeout(loadingTimer);
+        if (lastNotification != 'loading') {
+          loadingTimer = setTimeout(() => {
+            lastNotification = 'loading';
+            Notify.info('Loading data..', {
+              timeout: 999000,
+              showOnlyTheLastOne: true,
+            });
+          }, 1000);
+        }
+        fetchCountries(txt, displayData, logError);
       } else {
         list.innerHTML = '';
         info.innerHTML = '';
@@ -26,10 +121,10 @@ input.addEventListener(
         trailing: true,
       }),
     ]
-  )
-);
+  );
+};
 
-export const renderCountryInfo = country => {
+const renderCountryInfo = country => {
   list.innerHTML = '';
   let lang = Array.isArray(Object.values(country.languages))
     ? [...Object.values(country.languages)].join(', ')
@@ -44,7 +139,7 @@ export const renderCountryInfo = country => {
   info.innerHTML = markup;
 };
 
-export const renderCountryList = countryList => {
+const renderCountryList = countryList => {
   info.innerHTML = '';
   const markup = countryList
     .map(country => {
@@ -61,29 +156,22 @@ export const renderCountryList = countryList => {
       e.preventDefault();
       input.value = div.innerHTML;
       let txt = input.value.trim();
-      if (txt) fetchCountries(txt);
+      if (txt) {
+        console.log('will fetch: ' + txt);
+        clearTimeout(loadingTimer);
+        if (lastNotification != 'loading') {
+          loadingTimer = setTimeout(() => {
+            lastNotification = 'loading';
+            Notify.info('Loading data..', {
+              timeout: 999000,
+              showOnlyTheLastOne: true,
+            });
+          }, 1000);
+        }
+        fetchCountries(txt, displayData, logError);
+      }
     });
   }
 };
 
-// function createPromise(position, delay) {
-//   return new Promise((resolve, reject) => {
-//     const shouldResolve = Math.random() > 0.3;
-//     setTimeout(
-//       () => {
-//         if (shouldResolve) {
-//           // Fulfill
-//           resolve({ position, delay });
-//         } else {
-//           // Reject
-//           reject({ position, delay });
-//         }
-//       },
-//       delay,
-//       position
-//     );
-//   });
-
-// createPromise(i + 1, delay)
-//       .then(onSuccess)
-//       .catch(onReject);
+input.addEventListener('input', refreshDataRequest());
