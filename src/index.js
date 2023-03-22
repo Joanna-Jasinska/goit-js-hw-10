@@ -3,7 +3,7 @@ import { _ } from 'lodash';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
 
-console.log('updated 10:40 22.03.2023');
+console.log('updated 11:03 22.03.2023');
 
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('#search-box');
@@ -118,7 +118,7 @@ const refreshDataRequest = () => {
     },
     DEBOUNCE_DELAY,
     [
-      (options = {
+      (const options = {
         leading: false,
         trailing: true,
       }),
