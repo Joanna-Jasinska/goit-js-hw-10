@@ -175,3 +175,4 @@ const renderCountryList = countryList => {
 };
 
 input.addEventListener('input', refreshDataRequest());
+console.log('updated 10:40 22.03.2023');
